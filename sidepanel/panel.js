@@ -46,6 +46,8 @@ import {
   addRule,
   removeRule,
   STORAGE_KEY,
+  findCollection,
+  createSubCollection,
 } from '../lib/store.js';
 import { ruleLabel } from '../lib/rules.js';
 import { sortItems, sortCollections } from '../lib/sortview.js';
@@ -548,7 +550,7 @@ async function render() {
   }
   els.binView.hidden = true;
   if (openId && data.collections.some((c) => c.id === openId)) {
-    renderDetail(data.collections.find((c) => c.id === openId));
+    renderDetail(data.collections.find((c) => c.id === openId), data);
   } else {
     openId = null;
     renderList(data);
@@ -995,7 +997,7 @@ function wireCardDrag(card) {
   });
 }
 
-function renderDetail(c) {
+function renderDetail(c, data = null) {
   els.listView.hidden = true;
   els.detailView.hidden = false;
 
@@ -1026,7 +1028,7 @@ function renderDetail(c) {
 
   syncViewControls();
   for (const item of visible) {
-    els.items.appendChild(renderItem(c.id, item));
+    els.items.appendChild(renderItem(c.id, item, data));
   }
 }
 
@@ -1040,7 +1042,7 @@ function syncViewControls() {
   if (cs) cs.value = viewPrefs.collectionSort;
 }
 
-function renderItem(collectionId, item) {
+function renderItem(collectionId, item, data = null) {
   const row = document.createElement('div');
   row.className = 'item' + (item.done ? ' done' : '');
   row.dataset.id = item.id;
@@ -1074,6 +1076,12 @@ function renderItem(collectionId, item) {
         item.srcPageUrl || item.src
       )}" target="_blank" rel="noreferrer">${escapeHtml(item.alt || 'Image')}</a></div>
       <div class="item-url">${escapeHtml(hostOf(item.srcPageUrl || item.src))}</div>`;
+  } else if (item.type === 'collection' && data) {
+    let colCard = buildCard(findCollection(data, item.cid))
+    let cardCover = colCard.querySelector('.card-cover');
+    cardCover.classList.add('item-thumb');
+    thumbHtml = cardCover.outerHTML;
+    bodyHtml = colCard.querySelector('.card-body').outerHTML;
   } else {
     // page
     const fav = faviconFor(item);
@@ -1234,6 +1242,14 @@ function renderItem(collectionId, item) {
     ta.addEventListener('change', () =>
       updateItem(collectionId, item.id, { note: ta.value })
     );
+  }
+  if (item.type === 'collection' && data) {
+    const cb = row.querySelector('.card-body');
+    console.log(`DEBUG: ${row.innerHTML}`);
+    console.log(`DEBUG: ${cb}`);
+    cb.addEventListener('click', async () => {
+    open(item.cid);
+});
   }
 
   wireDrag(row, collectionId);
@@ -1727,6 +1743,16 @@ async function addAllTabs() {
     added++;
   }
   toast(added ? `Added ${added} tab${added === 1 ? '' : 's'}` : 'All tabs already saved');
+}
+
+/** Add new subcollection */
+async function addNewCollection() {
+  // fixme
+  if (!openId) return;
+
+  let thisId = openId
+
+  let c = await createSubCollection(thisId, "New subcollection")
 }
 
 // ---- Import / Export -------------------------------------------------------
@@ -2938,6 +2964,9 @@ $('#detail-overflow-menu').addEventListener('click', async (e) => {
   }
   if (action === 'add-all-tabs') {
     await addAllTabs();
+  }
+  if (action == 'add-new-collection') {
+    await addNewCollection();
   }
   if (action === 'export-collection-xlsx') {
     await doExportXlsx(openId);
