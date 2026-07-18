@@ -380,7 +380,14 @@ const moveMenu = $('#move-menu');
 
 async function openMoveMenu(anchor, fromId, itemId) {
   const data = await getData();
-  const others = data.collections.filter((c) => c.id !== fromId);
+
+  // If item is a subcollection, filter it out
+  const from = findCollection(data, fromId);
+  const item = from.items.find((it) => it.id === itemId);
+  const subCid = (item.type === 'collection') ? item.cid : null;
+
+  const others = data.collections.filter((c) => c.id !== fromId && c.id !== subCid);
+
   if (!others.length) {
     toast('No other collection to move to');
     return;
@@ -441,19 +448,31 @@ async function openFolderMenu(anchor, collectionId) {
   const data = await getData();
   const folders = data.folders || [];
   const current = data.collections.find((c) => c.id === collectionId)?.parentId || '';
+  const collections = data.collections.filter(c => c.id !== collectionId);
   folderMenu.dataset.collection = collectionId;
   folderMenu.innerHTML =
-    `<div class="menu-note">Move to folder</div>` +
-    `<button class="folder-pick" data-to="">${current ? '' : '✓ '}No folder</button>` +
-    folders
+      `<div class="menu-note">Move to folder</div>` +
+      `<button class="folder-pick" data-to="">${current ? '' : '✓ '}No folder</button>` +
+      folders
+          .map(
+              (f) =>
+                  `<button class="folder-pick" data-to="${f.id}">${current === f.id ? '✓ ' : ''}${escapeHtml(
+                      f.name
+                  )}</button>`
+          )
+          .join('') +
+      `<div class="menu-sep"></div><button class="folder-pick" data-to="__new_folder">＋ New folder…</button>` +
+  `<div class="menu-note">Move to collection</div>` +
+  `<button class="folder-pick collection-pick" data-to="">${current ? '' : '✓ '}No collection</button>` +
+  collections
       .map(
-        (f) =>
-          `<button class="folder-pick" data-to="${f.id}">${current === f.id ? '✓ ' : ''}${escapeHtml(
-            f.name
-          )}</button>`
+          (c) =>
+              `<button class="folder-pick collection-pick" data-to="${c.id}">${current === c.id ? '✓ ' : ''}${escapeHtml(
+                  c.title
+              )}</button>`
       )
       .join('') +
-    `<div class="menu-sep"></div><button class="folder-pick" data-to="__new">＋ New folder…</button>`;
+  `<div class="menu-sep"></div><button class="folder-pick collection-pick" data-to="__new_collection">＋ New collection…</button>`;
 
   folderMenu.hidden = false;
   const r = anchor.getBoundingClientRect();
@@ -468,12 +487,19 @@ folderMenu.addEventListener('click', async (e) => {
   const collectionId = folderMenu.dataset.collection;
   folderMenu.hidden = true;
   let to = btn.dataset.to;
-  if (to === '__new') {
+  if (to === '__new_folder') {
     const name = ((await showPrompt('New folder name:')) || '').trim();
     if (!name) return;
     to = (await createFolder(name)).id;
+  } else if (to ==='__new_collection') {
+    to = (await createCollection()).id;
   }
-  await setParent(collectionId, to || null);
+  if (btn.classList.contains('collection-pick')) {
+    await addItem(to, {type: 'collection', cid: collectionId})
+  }
+
+  to = to || null;
+  await setParent(collectionId, to);
 });
 
 document.addEventListener('click', (e) => {
@@ -792,8 +818,9 @@ function renderList(data) {
 
   // Top-level collections first, then each folder with its collections.
   for (const c of arrange(filtered.filter((c) => !c.parentId))) {
-    els.collections.appendChild(buildCard(c));
+      els.collections.appendChild(buildCard(c));
   }
+
   for (const f of folders) {
     const kids = arrange(filtered.filter((c) => c.parentId === f.id));
     els.collections.appendChild(buildFolderHeader(f, kids.length));
@@ -802,6 +829,9 @@ function renderList(data) {
 }
 
 // ---- Trash / Archive view --------------------------------------------------
+function isRenderedTrash(entry, data) {
+  return entry.kind !== 'collection' || !entry.collection.parentId || !data.trash.some((p) => p.collection.id === entry.collection.parentId); // filter subcollections with a parent in the trash
+}
 
 function renderBin(data) {
   els.listView.hidden = true;
@@ -814,8 +844,8 @@ function renderBin(data) {
   const isTrash = binMode === 'trash';
   // Normalize archive collections into the same {kind, …} shape trash uses.
   const entries = isTrash
-    ? data.trash || []
-    : (data.archive || []).map((c) => ({
+    ? data.trash.filter((e) => isRenderedTrash(e, data) ) || [] // hide subcollections unless parent isn't in trash
+    : (data.archive || []).filter((c) => !c.parentId).map((c) => ({
         id: c.id,
         kind: 'collection',
         archivedAt: c.archivedAt,
@@ -1077,7 +1107,7 @@ function renderItem(collectionId, item, data = null) {
       )}" target="_blank" rel="noreferrer">${escapeHtml(item.alt || 'Image')}</a></div>
       <div class="item-url">${escapeHtml(hostOf(item.srcPageUrl || item.src))}</div>`;
   } else if (item.type === 'collection' && data) {
-    let colCard = buildCard(findCollection(data, item.cid))
+    let colCard = buildCard(findCollection(data, item.cid));
     let cardCover = colCard.querySelector('.card-cover');
     cardCover.classList.add('item-thumb');
     thumbHtml = cardCover.outerHTML;
@@ -1672,6 +1702,7 @@ async function deleteItemWithUndo(collectionId, itemId) {
   const item = index >= 0 ? c.items[index] : null;
   if (!item) return;
   await removeItem(collectionId, itemId);
+
   toast('Item removed', { label: 'Undo', fn: () => insertItem(collectionId, item, index) });
 }
 
@@ -1747,12 +1778,11 @@ async function addAllTabs() {
 
 /** Add new subcollection */
 async function addNewCollection() {
-  // fixme
   if (!openId) return;
 
-  let thisId = openId
+  //let thisId = openId
 
-  let c = await createSubCollection(thisId, "New subcollection")
+  await createSubCollection(openId, "New subcollection")
 }
 
 // ---- Import / Export -------------------------------------------------------
@@ -2678,8 +2708,8 @@ function updateBinBadges(data) {
     el.hidden = !count;
     el.textContent = count > 99 ? '99+' : String(count);
   };
-  set('#archive-badge', (data.archive || []).length);
-  set('#trash-badge', (data.trash || []).length);
+  set('#archive-badge', (data.archive || []).filter((c) => !c.parentId).length);
+  set('#trash-badge', (data.trash || []).filter((e) => isRenderedTrash(e, data)).length);
   set('#reading-badge', countUnread(data));
 }
 
@@ -2965,7 +2995,7 @@ $('#detail-overflow-menu').addEventListener('click', async (e) => {
   if (action === 'add-all-tabs') {
     await addAllTabs();
   }
-  if (action == 'add-new-collection') {
+  if (action === 'add-new-collection') {
     await addNewCollection();
   }
   if (action === 'export-collection-xlsx') {
