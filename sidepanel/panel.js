@@ -3,6 +3,9 @@ import {
   getData,
   createCollection,
   renameCollection,
+  findCollection,
+  createSubCollection,
+  findAllChildren,
   insertItem,
   ensureActiveCollection,
   setActive,
@@ -47,8 +50,6 @@ import {
   addRule,
   removeRule,
   STORAGE_KEY,
-  findCollection,
-  createSubCollection,
 } from '../lib/store.js';
 import { ruleLabel } from '../lib/rules.js';
 import { sortItems, sortCollections } from '../lib/sortview.js';
@@ -414,8 +415,8 @@ async function openMoveMenu(anchor, fromId, itemId) {
   const from = findCollection(data, fromId);
   const item = from.items.find((it) => it.id === itemId);
   const subCid = (item.type === 'collection') ? item.cid : null;
-
-  const others = data.collections.filter((c) => c.id !== fromId && c.id !== subCid);
+  const children = await findAllChildren(subCid);
+  const others = data.collections.filter((c) => c.id !== fromId && c.id !== subCid && !children.has(c.id));
 
   if (!others.length) {
     toast('No other collection to move to');
@@ -477,7 +478,8 @@ async function openFolderMenu(anchor, collectionId) {
   const data = await getData();
   const folders = data.folders || [];
   const current = data.collections.find((c) => c.id === collectionId)?.parentId || '';
-  const collections = data.collections.filter(c => c.id !== collectionId);
+  const children = await findAllChildren(collectionId);
+  const collections = data.collections.filter(c => c.id !== collectionId && !children.has(c.id));
   folderMenu.dataset.collection = collectionId;
   folderMenu.innerHTML =
       `<div class="menu-note">Move to folder</div>` +
