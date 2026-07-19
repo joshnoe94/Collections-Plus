@@ -118,6 +118,7 @@
         <div class="cover-control">
           <div id="detail-cover" class="cover-preview" title="Collection cover">🗂️</div>
           <button id="cover-change-btn" class="btn">Change cover…</button>
+          <button id="cover-color-btn" class="btn cover-color-btn" title="Cover color">🎨</button>
           <button id="cover-remove-btn" class="btn icon" title="Remove cover" hidden>✕</button>
         </div>
         <button id="add-current-btn" class="btn primary wide">＋ Add current page</button>
@@ -288,6 +289,7 @@
       <button data-action="toggle-cache" id="toggle-cache-btn">Cache images: Off</button>
       <button data-action="check-all-links">Check all links</button>
       <button data-action="toggle-autocheck" id="toggle-autocheck-btn">Auto-check links: Off</button>
+      <button data-action="toggle-close-after-open" id="toggle-close-after-open-btn">Close panel after Open all: Off</button>
       <button data-action="rules">Auto-file rules…</button>
       <button data-action="history">Version history…</button>
     </div>
@@ -309,6 +311,9 @@
 
     <!-- Floating menu to assign a collection to a folder -->
     <div id="folder-menu" class="menu floating" hidden></div>
+
+    <!-- Floating swatch palette for cover / folder colors -->
+    <div id="color-menu" class="menu floating" hidden></div>
 
     <!-- Auto-file rules manager -->
     <div id="rules-overlay" class="modal-overlay" hidden>
@@ -366,9 +371,9 @@
         <div class="snapshot-meta" id="snapshot-meta"></div>
         <div class="snapshot-body" id="snapshot-body"></div>
         <div class="snapshot-actions">
-          <a id="snapshot-open" class="btn" target="_blank" rel="noreferrer">Open original ↗</a>
+          <a id="snapshot-open" class="btn" target="_blank" rel="noreferrer" title="Open the original page">Open ↗</a>
           <button id="snapshot-summarize" class="btn">Summarize (AI)</button>
-          <button id="snapshot-recapture" class="btn">Re-capture</button>
+          <button id="snapshot-recapture" class="btn" title="Re-capture the snapshot">Refresh</button>
         </div>
       </div>
     </div>

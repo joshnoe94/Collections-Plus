@@ -3,6 +3,73 @@
 Release notes for Collections Plus. The summaries here double as the
 "What's new" copy used in the Chrome Web Store listing.
 
+## 2.3.0
+
+Three requested improvements for organizing — and protecting — a large library:
+
+**Drag a collection straight into a folder.** You no longer need the 📁 menu to
+file a collection. Grab a card by its handle and drop it onto a folder header to
+move it in; drop it onto a top-level card to pull it back out. The folder header
+highlights as you drag over it. The menu still works for keyboard/precision
+moves.
+
+**Cover colors.** Instead of hunting for or uploading an image, give a
+collection a solid-color cover from a preset palette — click **🎨** next to
+"Change cover…". Folders get colors too: hover a folder header and click **🎨**
+to tag it with an accent stripe and colored label. It's the same quick,
+consistent approach Edge offers for Workspaces. Colors sync and export like any
+other data.
+
+**Automatic Chrome-account backup (survives an extension reset).** After the
+recent Edge/Windows update that corrupted extensions and forced a reset — wiping
+some users' collections — Collections Plus now keeps a lightweight recovery copy
+of your library (titles, links, notes, tags, folders & colors) in your Chrome
+account's synced storage. It updates automatically in the background, needs no
+setup or permissions, and is restored automatically if the extension is ever
+reset or reinstalled and your local data is gone. It's a safety net, not a
+replacement for full Sync: heavy items (cached images, readable snapshots) are
+left out to fit Chrome's size limit, and very large libraries keep only their
+most-recent collections (you'll be told if so). For a complete cross-device
+backup, set up file **Sync** — and the panel now nudges you to resume Sync if a
+browser restart left it paused. Thanks to the users who reported all three.
+
+## 2.2.0
+
+**Rename saved pages.** Every saved page now has a **✎ Rename** button (hover a
+row to reveal it, next to Move and Remove) that lets you give it a friendlier
+name than the raw tab title it was captured with. Saved images can be renamed
+too — the new name becomes their display text. The rename is stored like any
+other edit, so it travels with your sync and shows up on every device. Thanks to
+Gianpaolo for the suggestion — previously the only way to get a "nice name" was
+to hand-edit the sync file.
+
+## 2.1.1
+
+Two bug fixes:
+
+**Links with a `%` now work.** Saved page links that contained a percent sign
+(most commonly Microsoft SharePoint URLs, where spaces show up as `%20`) were
+being double-encoded when rendered — `%20` became `%2520` — so the link opened
+to the wrong place or a dead page. Links are now escaped correctly and open
+exactly as saved. Affects the link rendered for every saved page, image and
+highlight.
+
+**Snapshot reader buttons fit the panel.** In the readable-snapshot view the
+action buttons could get pushed past the edge of the popup at narrow side-panel
+widths, hiding part of the **Open original** button. The buttons are now
+labelled **Open ↗**, **Summarize (AI)** and **Refresh**, and wrap cleanly if
+space is truly tight — so they always stay inside the window. Thanks to
+Gianpaolo for both reports.
+
+## 2.1.0
+
+**Close the panel after Open all.** A new opt-in setting (⋯ → **Tools** →
+**Close panel after Open all**) makes the side panel close itself the moment
+you open a collection with **▶ Open all pages** — so opening a saved project is
+a single click with nothing left to dismiss. It's off by default; turn it on if
+you'd rather the panel step out of the way once your tabs are up. Thanks to
+Gianpaolo for the suggestion.
+
 ## 2.0.0
 
 The biggest release yet — a baker's dozen of new features that make Collections

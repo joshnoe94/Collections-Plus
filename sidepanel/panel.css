@@ -506,9 +506,18 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 6px 4px;
+  padding: 8px 6px 7px;
   margin-top: 4px;
   border-top: 1px solid var(--border);
+}
+
+.folder-icon {
+  flex: 0 0 auto;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  /* Nudge into optical alignment with the larger name text. */
+  margin-right: -1px;
 }
 
 .folder-toggle {
@@ -523,7 +532,7 @@ body {
 .folder-name {
   flex: 1;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -535,6 +544,7 @@ body {
   font-size: 12px;
 }
 
+.folder-color,
 .folder-rename,
 .folder-del {
   background: none;
@@ -548,6 +558,7 @@ body {
   transition: opacity 0.12s ease;
 }
 
+.folder-header:hover .folder-color,
 .folder-header:hover .folder-rename,
 .folder-header:hover .folder-del {
   opacity: 1;
@@ -555,6 +566,24 @@ body {
 
 .folder-del:hover {
   color: var(--danger);
+}
+
+/* A colored folder gets an accent bar on its left edge and a faint name tint. */
+.folder-header.has-color {
+  border-left: 3px solid var(--folder-color);
+  padding-left: 6px;
+  border-radius: 0 6px 6px 0;
+}
+
+.folder-header.has-color .folder-name {
+  color: var(--folder-color);
+}
+
+/* Highlight a folder header while a collection card is dragged over it. */
+.folder-header.drop-target {
+  background: var(--bg-elev-2);
+  outline: 1px dashed var(--accent);
+  outline-offset: -2px;
 }
 
 .folder-pick {
@@ -820,6 +849,7 @@ body {
 }
 
 .item-cover-btn,
+.item-rename-btn,
 .item-field-add,
 .item-snapshot-btn,
 .item-move-btn {
@@ -835,6 +865,7 @@ body {
 }
 
 .item:hover .item-cover-btn,
+.item:hover .item-rename-btn,
 .item:hover .item-field-add,
 .item:hover .item-snapshot-btn,
 .item:hover .item-move-btn {
@@ -842,6 +873,7 @@ body {
 }
 
 .item-cover-btn:hover,
+.item-rename-btn:hover,
 .item-field-add:hover,
 .item-snapshot-btn:hover,
 .item-move-btn:hover {
@@ -967,6 +999,7 @@ body {
 
 .snapshot-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
   margin-top: 12px;
@@ -1319,6 +1352,57 @@ a.aisearch-result-title:hover {
 }
 
 .hist-row:hover {
+  background: var(--bg-elev-2);
+}
+
+/* ---- Color swatch palette (cover + folder colors) ---- */
+#color-menu {
+  min-width: 0;
+}
+
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  padding: 4px 2px 6px;
+}
+
+/* Specific enough to beat the generic `.menu button` rule (width/radius). */
+.swatch-grid .swatch {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s ease;
+}
+
+.swatch-grid .swatch:hover {
+  transform: scale(1.15);
+}
+
+.swatch-grid .swatch.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg-elev-1);
+}
+
+.color-none {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: 6px 8px;
+  border-radius: 5px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.color-none:hover {
   background: var(--bg-elev-2);
 }
 
