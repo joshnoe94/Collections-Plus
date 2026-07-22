@@ -418,10 +418,6 @@ async function openMoveMenu(anchor, fromId, itemId) {
   const children = await findAllChildren(subCid);
   const others = data.collections.filter((c) => c.id !== fromId && c.id !== subCid && !children.has(c.id));
 
-  if (!others.length) {
-    toast('No other collection to move to');
-    return;
-  }
   moveMenu.dataset.from = fromId;
   moveMenu.dataset.item = itemId;
   moveMenu.innerHTML =
@@ -436,7 +432,13 @@ async function openMoveMenu(anchor, fromId, itemId) {
         <button class="move-copy" data-act="copy" data-to="${c.id}" title="Copy here">⎘</button>
       </div>`
       )
-      .join('');
+      .join('') +
+    `<div class="menu-sep"></div>` +
+    `<div class="move-row">
+        <button class="move-go" data-act="move" data-to="__new_collection" title="Move here">＋ New collection…</button>
+        <button class="move-copy" data-act="copy" data-to="__new_collection" title="Copy here"
+    </div>`;
+
   // Unhide to measure, then position near the anchor and keep it on-screen.
   moveMenu.hidden = false;
   const r = anchor.getBoundingClientRect();
@@ -452,10 +454,13 @@ async function openMoveMenu(anchor, fromId, itemId) {
 moveMenu.addEventListener('click', async (e) => {
   const btn = e.target.closest('[data-act]');
   if (!btn) return;
-  const to = btn.dataset.to;
+  let to = btn.dataset.to;
   const from = moveMenu.dataset.from;
   const itemId = moveMenu.dataset.item;
   moveMenu.hidden = true;
+  if (to === '__new_collection') {
+    to = (await createCollection()).id;
+  }
   if (btn.dataset.act === 'copy') {
     await copyItems(from, [itemId], to);
     toast('Copied to collection');
@@ -1429,10 +1434,8 @@ function renderItem(collectionId, item, data = null) {
   }
   if (item.type === 'collection' && data) {
     const cb = row.querySelector('.card-body');
-    console.log(`DEBUG: ${row.innerHTML}`);
-    console.log(`DEBUG: ${cb}`);
     cb.addEventListener('click', async () => {
-    open(item.cid);
+    await open(item.cid);
 });
   }
 
