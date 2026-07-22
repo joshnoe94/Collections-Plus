@@ -950,7 +950,7 @@ function renderList(data) {
 
 // ---- Trash / Archive view --------------------------------------------------
 function isRenderedTrash(entry, data) {
-  return entry.kind !== 'collection' || !entry.collection.parentId || !data.trash.some((p) => p.collection.id === entry.collection.parentId); // filter subcollections with a parent in the trash
+  return entry.kind !== 'collection' || !entry.collection.parentId || !data.trash.some((p) => (p.kind === 'collection' && p.collection.id === entry.collection.parentId)); // filter subcollections with a parent in the trash
 }
 
 function renderBin(data) {
