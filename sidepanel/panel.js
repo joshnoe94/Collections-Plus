@@ -443,7 +443,7 @@ async function openMoveMenu(anchor, fromId, itemId) {
     `<div class="menu-sep"></div>` +
     `<div class="move-row">
         <button class="move-go" data-act="move" data-to="__new_collection" title="Move here">＋ New collection…</button>
-        <button class="move-copy" data-act="copy" data-to="__new_collection" title="Copy here"
+        <button class="move-copy" data-act="copy" data-to="__new_collection" title="Copy here">⎘</button>
     </div>`;
 
   // Unhide to measure, then position near the anchor and keep it on-screen.
